@@ -1,5 +1,5 @@
 /*
- * # AutoScroll 1.0.0
+ * # AutoScroll 1.0.1
  *
  * http://github.com/withassociates/autoscroll.js
  *
@@ -34,6 +34,7 @@
 // class AutoScroll
 var AutoScroll = function() {
   var self = this;
+  self.version = '1.0.0';
 
   // starts autoscroll listening for events and performing scrolling
   self.start = function() {

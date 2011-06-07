@@ -1,4 +1,4 @@
-# AutoScroll 1.0.0
+# AutoScroll 1.0.1
 
 http://github.com/withassociates/autoscroll.js
 
