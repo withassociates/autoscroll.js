@@ -1,0 +1,158 @@
+/*
+ * # AutoScroll 1.0.0
+ *
+ * http://github.com/withassociates/autoscroll
+ *
+ * Simplest possible autoscrolling library.
+ * Creates a top-level instance to start/stop the behaviour.
+ *
+ * ## Usage
+ *
+ *     window.autoscroll.start();
+ *     window.autoscroll.stop();
+ *
+ * ## Settings & Defaults
+ *
+ *     window.autoscroll.interval     = 1000 / 60
+ *     window.autoscroll.threshold    = 50
+ *     window.autoscroll.velocity     = 2
+ *     window.autoscroll.acceleration = 0.01
+ *
+ * ## Dependencies
+ *
+ *   * jQuery ~> 1.5.2
+ *
+ * ## Contributors
+ *
+ *   * jamie@withassociates.com
+ *
+ * Licensed under the terms of the MIT license.
+ */
+
+(function($) {
+
+// class AutoScroll
+var AutoScroll = function() {
+  var self = this;
+
+  // starts autoscroll listening for events and performing scrolling
+  self.start = function() {
+    if (self.running) return;
+    reset();
+    listen();
+    update();
+    self.running = true;
+  }
+
+  // shuts down autoscroll
+  self.stop = function() {
+    if (!self.running) return;
+    clearTimeout(timeout);
+    stopListening();
+    self.running = false;
+  }
+
+  // defaults
+  self.interval     = 1000 / 60;
+  self.threshold    = 50;
+  self.velocity     = 2;
+  self.acceleration = 0.01;
+
+  // private properties
+  var mouseNow,
+      reset,
+      scrollingUp,
+      scrollingDown,
+      timeout,
+      viewportNow,
+      whenScrollingStarted,
+      $window = $(window);
+
+  // private methods
+  var checkTop,
+      checkBottom,
+      listen,
+      stopListening,
+      onMouseMove,
+      onResize,
+      update,
+      velocity;
+
+  onMouseMove = function(event) {
+    mouseNow = {
+      x: event.pageX - $window.scrollLeft(),
+      y: event.pageY - $window.scrollTop()
+    };
+  }
+
+  onResize = function() {
+    viewportNow = {
+      width: $window.width(),
+      height: $window.height()
+    };
+  }
+
+  checkTop = function() {
+    if (mouseNow.y < self.threshold) {
+      if (!scrollingUp) {
+        scrollingUp = true;
+        whenScrollingStarted = new Date();
+      }
+      $window.scrollTop($window.scrollTop() - velocity());
+    } else {
+      scrollingUp = false;
+    }
+  }
+
+  checkBottom = function() {
+    if (mouseNow.y > viewportNow.height - self.threshold) {
+      if (!scrollingDown) {
+        scrollingDown = true;
+        whenScrollingStarted = new Date();
+      }
+      $window.scrollTop($window.scrollTop() + velocity());
+    } else {
+      scrollingDown = false;
+    }
+  }
+
+  velocity = function() {
+    var now  = new Date(),
+        time = now - whenScrollingStarted;
+
+    return self.velocity + (self.acceleration * time);
+  }
+
+  update = function() {
+    if (mouseNow) {
+      checkTop();
+      checkBottom();
+    }
+    timeout = setTimeout(update, self.interval);
+  }
+
+  reset = function() {
+    delete mouseNow;
+    delete scrollingUp;
+    delete scrollingDown;
+    delete whenScrollingStarted;
+  }
+
+  listen = function() {
+    $(document).bind('mousemove', onMouseMove);
+    $(document).bind('resize', onResize);
+    onResize();
+  }
+
+  stopListening = function() {
+    $(document).unbind('mousemove', onMouseMove);
+    $(document).unbind('resize', onResize);
+  }
+
+}
+
+// Create top-level instance
+// We don't want more than one, so we can lose the constructor after this.
+window.autoscroll = new AutoScroll();
+
+})(jQuery);
