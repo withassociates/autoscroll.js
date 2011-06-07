@@ -1,7 +1,7 @@
 /*
  * # AutoScroll 1.0.0
  *
- * http://github.com/withassociates/autoscroll
+ * http://github.com/withassociates/autoscroll.js
  *
  * Simplest possible autoscrolling library.
  * Creates a top-level instance to start/stop the behaviour.
