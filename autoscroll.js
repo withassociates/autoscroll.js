@@ -1,5 +1,5 @@
 /*
- * # AutoScroll 1.0.1
+ * # AutoScroll 1.1.0
  *
  * http://github.com/withassociates/autoscroll.js
  *
@@ -34,7 +34,7 @@
 // class AutoScroll
 var AutoScroll = function() {
   var self = this;
-  self.version = '1.0.1';
+  self.version = '1.1.0';
 
   // starts autoscroll listening for events and performing scrolling
   self.start = function() {
@@ -67,7 +67,8 @@ var AutoScroll = function() {
       timeout,
       viewportNow,
       whenScrollingStarted,
-      $window = $(window);
+      $window = $(window),
+      $document = $(document);
 
   // private methods
   var checkTop,
@@ -77,10 +78,13 @@ var AutoScroll = function() {
       onMouseMove,
       onResize,
       update,
-      velocity;
+      velocity,
+      triggerMouseMove;
 
   onMouseMove = function(event) {
     mouseNow = {
+      pageX: event.pageX,
+      pageY: event.pageY,
       x: event.pageX - $window.scrollLeft(),
       y: event.pageY - $window.scrollTop()
     };
@@ -99,7 +103,9 @@ var AutoScroll = function() {
         scrollingUp = true;
         whenScrollingStarted = new Date();
       }
-      $window.scrollTop($window.scrollTop() - velocity());
+      var v = velocity();
+      $window.scrollTop($window.scrollTop() - v);
+      triggerMouseMove(0, -v);
     } else {
       scrollingUp = false;
     }
@@ -111,7 +117,9 @@ var AutoScroll = function() {
         scrollingDown = true;
         whenScrollingStarted = new Date();
       }
-      $window.scrollTop($window.scrollTop() + velocity());
+      var v = velocity();
+      $window.scrollTop($window.scrollTop() + v);
+      triggerMouseMove(0, v);
     } else {
       scrollingDown = false;
     }
@@ -121,7 +129,14 @@ var AutoScroll = function() {
     var now  = new Date(),
         time = now - whenScrollingStarted;
 
-    return self.velocity + (self.acceleration * time);
+    return Math.round(self.velocity + (self.acceleration * time));
+  }
+
+  triggerMouseMove = function(dx, dy) {
+    $document.trigger($.Event('mousemove', {
+      pageX: mouseNow.pageX + dx,
+      pageY: mouseNow.pageY + dy
+    }));
   }
 
   update = function() {
@@ -140,14 +155,14 @@ var AutoScroll = function() {
   }
 
   listen = function() {
-    $(document).bind('mousemove', onMouseMove);
-    $(document).bind('resize', onResize);
+    $document.bind('mousemove', onMouseMove);
+    $document.bind('resize', onResize);
     onResize();
   }
 
   stopListening = function() {
-    $(document).unbind('mousemove', onMouseMove);
-    $(document).unbind('resize', onResize);
+    $document.unbind('mousemove', onMouseMove);
+    $document.unbind('resize', onResize);
   }
 
 }
