@@ -1,5 +1,5 @@
 /*
- * # AutoScroll 1.1.0
+ * # AutoScroll 1.1.1
  *
  * http://github.com/withassociates/autoscroll.js
  *
@@ -34,7 +34,7 @@
 // class AutoScroll
 var AutoScroll = function() {
   var self = this;
-  self.version = '1.1.0';
+  self.version = '1.1.1';
 
   // starts autoscroll listening for events and performing scrolling
   self.start = function() {
@@ -66,6 +66,7 @@ var AutoScroll = function() {
       scrollingDown,
       timeout,
       viewportNow,
+      pageNow,
       whenScrollingStarted,
       $window = $(window),
       $document = $(document);
@@ -95,10 +96,20 @@ var AutoScroll = function() {
       width: $window.width(),
       height: $window.height()
     };
+    pageNow = {
+      width: $('body').outerWidth(),
+      height: $('body').outerHeight()
+    }
+    $('body > *').each(function() {
+      pageNow.height = Math.max(pageNow.height, $(this).outerHeight());
+    });
   }
 
   checkTop = function() {
-    if (mouseNow.y < self.threshold) {
+    var isPastThreshold = mouseNow.y < self.threshold,
+        isAtMin = $window.scrollTop() <= 0;
+
+    if (isPastThreshold && !isAtMin) {
       if (!scrollingUp) {
         scrollingUp = true;
         whenScrollingStarted = new Date();
@@ -112,7 +123,10 @@ var AutoScroll = function() {
   }
 
   checkBottom = function() {
-    if (mouseNow.y > viewportNow.height - self.threshold) {
+    var isPastThreshold = mouseNow.y > viewportNow.height - self.threshold,
+        isAtMax = $window.scrollTop() >= pageNow.height - $window.height();
+
+    if (isPastThreshold && !isAtMax) {
       if (!scrollingDown) {
         scrollingDown = true;
         whenScrollingStarted = new Date();

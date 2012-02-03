@@ -1,3 +1,9 @@
+# 1.1.1 / 2012-02-03
+
+* Bugfixes
+
+  * Do not autoscroll beyond edge of page
+
 # 1.1.0 / 2012-02-03
 
 * Features
